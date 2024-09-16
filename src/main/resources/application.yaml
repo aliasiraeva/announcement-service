@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: announcement-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/announcement_service
+    username: announcement_service
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jackson:
+    serialization:
+      indent-output: true
+      fail-on-empty-beans: false
