@@ -3,6 +3,9 @@ package com.example.announcement_service.controller;
 import com.example.announcement_service.entity.Announcement;
 import com.example.announcement_service.model.ShortAnnouncement;
 import com.example.announcement_service.service.AnnouncementService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,13 +30,18 @@ public class AnnouncementController {
     }
 
     @PostMapping
-    public void postAnnouncement(Announcement announcement) {
-        announcementService.addAnnouncement(announcement);
+    public void postAnnouncement(@Valid @RequestBody Announcement announcement) {
+        announcementService.saveAnnouncement(announcement);
     }
 
-    @DeleteMapping
-    public void deleteAnnouncement(Integer id) {
+    @DeleteMapping("/{id}")
+    public void deleteAnnouncement(@PathVariable Integer id) {
         announcementService.deleteAnnouncement(id);
+    }
+
+    @PutMapping("/{id}")
+    public void putAnnouncement(@PathVariable Integer id, @Valid @RequestBody Announcement announcement) {
+        announcementService.updateAnnouncement(id, announcement);
     }
 
     @GetMapping("/short")
@@ -42,7 +50,7 @@ public class AnnouncementController {
     }
 
     @GetMapping("/nearest")
-    public List<Announcement> getNearestAnnouncements(double lat, double lng, int distance) {
+    public List<Announcement> getNearestAnnouncements(@NotNull double lat, @NotNull double lng, @Size(min=10, max=10000) int distance) {
         return announcementService.getNearestAnnouncements(lat, lng, distance);
     }
 }

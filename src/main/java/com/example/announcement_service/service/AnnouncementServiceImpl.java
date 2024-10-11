@@ -2,24 +2,25 @@ package com.example.announcement_service.service;
 
 import com.example.announcement_service.entity.Announcement;
 import com.example.announcement_service.entity.Image;
+import com.example.announcement_service.geolocation.client.GeoClient;
 import com.example.announcement_service.geolocation.model.GeoLocation;
 import com.example.announcement_service.geolocation.util.GeoUtils;
 import com.example.announcement_service.model.DeepLink;
 import com.example.announcement_service.model.ShortAnnouncement;
 import com.example.announcement_service.repository.AnnouncementRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AnnouncementServiceImpl implements AnnouncementService {
     private final AnnouncementRepository announcementRepository;
-
-    public AnnouncementServiceImpl(AnnouncementRepository announcementRepository) {
-        this.announcementRepository = announcementRepository;
-    }
+    private final GeoClient geoClient;
 
     @Override
     public List<Announcement> getAnnouncementsByDate() {
@@ -34,13 +35,33 @@ public class AnnouncementServiceImpl implements AnnouncementService {
     }
 
     @Override
-    public void addAnnouncement(Announcement announcement) {
+    public void saveAnnouncement(Announcement announcement) {
+        if ((announcement.getLat() == null || announcement.getLng() == null) && !(announcement.getAddress() == null)) {
+            GeoLocation location = geoClient.getLocation(announcement.getAddress());
+            announcement.setLng(location.getLng());
+            announcement.setLat(location.getLat());
+        }
+        if (announcement.getAddress() == null && !(announcement.getLat() == null || announcement.getLng() == null)) {
+            announcement.setAddress(geoClient.getAddress(GeoLocation.builder().lng(announcement.getLng()).lat(announcement.getLat()).build()));
+        }
+        if ((announcement.getAddress() == null) && (announcement.getLat() == null || announcement.getLng() == null)) {
+            throw new IllegalArgumentException();
+        }
+        announcement.setDate(LocalDateTime.now());
         announcementRepository.save(announcement);
     }
 
     @Override
     public void deleteAnnouncement(Integer id) {
         announcementRepository.deleteById(id);
+    }
+    @Override
+    public void updateAnnouncement(Integer id, Announcement announcement) {
+        if(!announcementRepository.existsById(id)) {
+            throw new IllegalArgumentException("Объявление не найдено");
+        }
+        announcementRepository.deleteById(id);
+        saveAnnouncement(announcement);
     }
 
     @Override

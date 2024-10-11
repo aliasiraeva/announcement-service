@@ -10,6 +10,7 @@ create table announcement
     text         varchar(500),
     lat          decimal,
     lng          decimal,
+    address      varchar(200),
     phone_number varchar(10),
     date         timestamp
 );
@@ -21,5 +22,5 @@ create table image
     is_preview      boolean,
     announcement_id int,
     foreign key (announcement_id) references announcement (id)
-)
+);
 

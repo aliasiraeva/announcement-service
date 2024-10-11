@@ -8,8 +8,9 @@ import java.util.List;
 public interface AnnouncementService {
     List<Announcement> getAnnouncementsByDate();
     Announcement getAnnouncementById(Integer id);
-    void addAnnouncement(Announcement announcement);
+    void saveAnnouncement(Announcement announcement);
     void deleteAnnouncement(Integer id);
+    void updateAnnouncement(Integer id, Announcement announcement);
     List<ShortAnnouncement> getShortAnnouncements();
     List<Announcement> getNearestAnnouncements(double lat, double lng, int distance);
 }
